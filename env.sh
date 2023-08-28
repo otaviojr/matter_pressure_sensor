@@ -1,0 +1,9 @@
+export PATH=/opt/otavio/ncs/toolchains/1f9b40e71a/usr/bin:/opt/otavio/ncs/toolchains/1f9b40e71a/usr/bin:/opt/otavio/ncs/toolchains/1f9b40e71a/usr/local/bin:/opt/otavio/ncs/toolchains/1f9b40e71a/opt/bin:/opt/otavio/ncs/toolchains/1f9b40e71a/opt/nanopb/generator-bin:/opt/otavio/ncs/toolchains/1f9b40e71a/opt/zephyr-sdk/aarch64-zephyr-elf/bin:/opt/otavio/ncs/toolchains/1f9b40e71a/opt/zephyr-sdk/x86_64-zephyr-elf/bin:/opt/otavio/ncs/toolchains/1f9b40e71a/opt/zephyr-sdk/arm-zephyr-eabi/bin:$PATH
+export LD_LIBRARY_PATH=/opt/otavio/ncs/toolchains/1f9b40e71a/usr/lib:/opt/otavio/ncs/toolchains/1f9b40e71a/usr/lib/x86_64-linux-gnu:/opt/otavio/ncs/toolchains/1f9b40e71a/usr/local/lib:$LD_LIBRARY_PATH
+export GIT_EXEC_PATH=/opt/otavio/ncs/toolchains/1f9b40e71a/usr/local/libexec/git-core
+export GIT_TEMPLATE_DIR=/opt/otavio/ncs/toolchains/1f9b40e71a/usr/local/share/git-core/templates
+export PYTHONHOME=/opt/otavio/ncs/toolchains/1f9b40e71a/usr/local
+export PYTHONPATH=/opt/otavio/ncs/toolchains/1f9b40e71a/usr/local/lib/python3.8/site-packages
+export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
+export ZEPHYR_SDK_INSTALL_DIR=/opt/otavio/ncs/toolchains/1f9b40e71a/opt/zephyr-sdk
+export ZEPHYR_BASE=/opt/otavio/ncs/v2.4.1/zephyr
