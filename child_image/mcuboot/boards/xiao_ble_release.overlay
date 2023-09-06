@@ -6,6 +6,6 @@
 
 / {
 	chosen {
-		nordic,pm-ext-flash = &mx25r64;
+		nordic,pm-ext-flash = &p25q16h;
 	};
 };

@@ -48,12 +48,12 @@ K_MSGQ_DEFINE(sAppEventQueue, sizeof(AppEvent), kAppEventQueueSize, alignof(AppE
 k_timer sFunctionTimer;
 
 LEDWidget sStatusLED;
-#if NUMBER_OF_LEDS == 2
+//#if NUMBER_OF_LEDS == 2
 FactoryResetLEDsWrapper<1> sFactoryResetLEDs{ { FACTORY_RESET_SIGNAL_LED } };
-#else
-FactoryResetLEDsWrapper<3> sFactoryResetLEDs{ { FACTORY_RESET_SIGNAL_LED, FACTORY_RESET_SIGNAL_LED1,
-						FACTORY_RESET_SIGNAL_LED2 } };
-#endif
+//#else
+//FactoryResetLEDsWrapper<3> sFactoryResetLEDs{ { FACTORY_RESET_SIGNAL_LED, FACTORY_RESET_SIGNAL_LED1,
+//						FACTORY_RESET_SIGNAL_LED2 } };
+//#endif
 
 bool sIsNetworkProvisioned = false;
 bool sIsNetworkEnabled = false;

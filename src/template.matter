@@ -11,6 +11,100 @@ struct LabelStruct {
     char_string<16> value = 1;
 }
 
+/** Attributes and commands for putting a device into Identification mode (e.g. flashing a light). */
+client cluster Identify = 3 {
+  enum IdentifyEffectIdentifier : ENUM8 {
+    kBlink = 0;
+    kBreathe = 1;
+    kOkay = 2;
+    kChannelChange = 11;
+    kFinishEffect = 254;
+    kStopEffect = 255;
+  }
+
+  enum IdentifyEffectVariant : ENUM8 {
+    kDefault = 0;
+  }
+
+  enum IdentifyIdentifyType : ENUM8 {
+    kNone = 0;
+    kVisibleLight = 1;
+    kVisibleLED = 2;
+    kAudibleBeep = 3;
+    kDisplay = 4;
+    kActuator = 5;
+  }
+
+  attribute int16u identifyTime = 0;
+  readonly attribute enum8 identifyType = 1;
+  readonly attribute command_id generatedCommandList[] = 65528;
+  readonly attribute command_id acceptedCommandList[] = 65529;
+  readonly attribute event_id eventList[] = 65530;
+  readonly attribute attrib_id attributeList[] = 65531;
+  readonly attribute bitmap32 featureMap = 65532;
+  readonly attribute int16u clusterRevision = 65533;
+
+  request struct IdentifyRequest {
+    INT16U identifyTime = 0;
+  }
+
+  request struct TriggerEffectRequest {
+    IdentifyEffectIdentifier effectIdentifier = 0;
+    IdentifyEffectVariant effectVariant = 1;
+  }
+
+  /** Command description for Identify */
+  command access(invoke: manage) Identify(IdentifyRequest): DefaultSuccess = 0;
+  /** Command description for TriggerEffect */
+  command access(invoke: manage) TriggerEffect(TriggerEffectRequest): DefaultSuccess = 64;
+}
+
+/** Attributes and commands for putting a device into Identification mode (e.g. flashing a light). */
+server cluster Identify = 3 {
+  enum IdentifyEffectIdentifier : ENUM8 {
+    kBlink = 0;
+    kBreathe = 1;
+    kOkay = 2;
+    kChannelChange = 11;
+    kFinishEffect = 254;
+    kStopEffect = 255;
+  }
+
+  enum IdentifyEffectVariant : ENUM8 {
+    kDefault = 0;
+  }
+
+  enum IdentifyIdentifyType : ENUM8 {
+    kNone = 0;
+    kVisibleLight = 1;
+    kVisibleLED = 2;
+    kAudibleBeep = 3;
+    kDisplay = 4;
+    kActuator = 5;
+  }
+
+  attribute int16u identifyTime = 0;
+  readonly attribute enum8 identifyType = 1;
+  readonly attribute command_id generatedCommandList[] = 65528;
+  readonly attribute command_id acceptedCommandList[] = 65529;
+  readonly attribute event_id eventList[] = 65530;
+  readonly attribute attrib_id attributeList[] = 65531;
+  readonly attribute bitmap32 featureMap = 65532;
+  readonly attribute int16u clusterRevision = 65533;
+
+  request struct IdentifyRequest {
+    INT16U identifyTime = 0;
+  }
+
+  request struct TriggerEffectRequest {
+    IdentifyEffectIdentifier effectIdentifier = 0;
+    IdentifyEffectVariant effectVariant = 1;
+  }
+
+  command access(invoke: manage) Identify(IdentifyRequest): DefaultSuccess = 0;
+  command access(invoke: manage) TriggerEffect(TriggerEffectRequest): DefaultSuccess = 64;
+}
+
 /** The Descriptor Cluster is meant to replace the support from the Zigbee Device Object (ZDO) for describing a node, its endpoints and clusters. */
 server cluster Descriptor = 29 {
   struct DeviceTypeStruct {
@@ -1132,6 +1226,23 @@ server cluster GroupKeyManagement = 63 {
   fabric command access(invoke: administer) KeySetReadAllIndices(KeySetReadAllIndicesRequest): KeySetReadAllIndicesResponse = 4;
 }
 
+/** Attributes and commands for configuring the measurement of pressure, and reporting pressure measurements. */
+server cluster PressureMeasurement = 1027 {
+  bitmap PressureMeasurementFeature : BITMAP32 {
+    kExtended = 0x1;
+  }
+
+  readonly attribute nullable int16s measuredValue = 0;
+  readonly attribute nullable int16s minMeasuredValue = 1;
+  readonly attribute nullable int16s maxMeasuredValue = 2;
+  readonly attribute command_id generatedCommandList[] = 65528;
+  readonly attribute command_id acceptedCommandList[] = 65529;
+  readonly attribute event_id eventList[] = 65530;
+  readonly attribute attrib_id attributeList[] = 65531;
+  readonly attribute bitmap32 featureMap = 65532;
+  readonly attribute int16u clusterRevision = 65533;
+}
+
 endpoint 0 {
   device type rootdevice = 22, version 1;
   binding cluster OtaSoftwareUpdateProvider;
@@ -1165,6 +1276,7 @@ endpoint 0 {
     emits event StartUp;
     emits event ShutDown;
     emits event Leave;
+    emits event ReachableChanged;
     callback attribute dataModelRevision default = 10;
     callback attribute vendorName;
     callback attribute vendorID;
@@ -1379,6 +1491,46 @@ endpoint 0 {
     callback attribute attributeList;
     ram      attribute featureMap default = 0;
     ram      attribute clusterRevision default = 1;
+  }
+}
+endpoint 1 {
+  device type onofflightswitch = 773, version 1;
+  binding cluster Identify;
+
+  server cluster Identify {
+    ram      attribute identifyTime default = 0x0000;
+    ram      attribute identifyType default = 0x0;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 0;
+    ram      attribute clusterRevision default = 4;
+  }
+
+  server cluster Descriptor {
+    callback attribute deviceTypeList;
+    callback attribute serverList;
+    callback attribute clientList;
+    callback attribute partsList;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 0;
+    callback attribute clusterRevision default = 1;
+  }
+
+  server cluster PressureMeasurement {
+    ram      attribute measuredValue;
+    ram      attribute minMeasuredValue;
+    ram      attribute maxMeasuredValue;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 0;
+    ram      attribute clusterRevision default = 3;
   }
 }
 
