@@ -30,6 +30,9 @@ public:
 	CHIP_ERROR StartApp();
 
 	static void PostEvent(const AppEvent &event);
+	static void SensorActivateHandler(const AppEvent &);
+	static void SensorDeactivateHandler(const AppEvent &);
+	static void SensorMeasureHandler(const AppEvent &);
 
 private:
 	CHIP_ERROR Init();

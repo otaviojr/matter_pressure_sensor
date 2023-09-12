@@ -40,6 +40,7 @@ target_include_directories(app PRIVATE
 )
 
 target_sources(app PRIVATE
+    src/zcl_callbacks.cpp
     src/app_task.cpp
     src/main.cpp
     src/zap-generated/IMClusterCommandHandler.cpp

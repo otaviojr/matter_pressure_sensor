@@ -35,6 +35,8 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
+#include <app-common/zap-generated/attributes/Accessors.h>
+
 LOG_MODULE_DECLARE(app, CONFIG_CHIP_APP_LOG_LEVEL);
 
 using namespace ::chip;
@@ -44,23 +46,25 @@ using namespace ::chip::DeviceLayer;
 
 namespace
 {
-constexpr size_t kAppEventQueueSize = 10;
-constexpr uint32_t kFactoryResetTriggerTimeout = 6000;
+	constexpr size_t kAppEventQueueSize = 10;
+	constexpr uint32_t kFactoryResetTriggerTimeout = 6000;
 
-K_MSGQ_DEFINE(sAppEventQueue, sizeof(AppEvent), kAppEventQueueSize, alignof(AppEvent));
-k_timer sFunctionTimer;
+	K_MSGQ_DEFINE(sAppEventQueue, sizeof(AppEvent), kAppEventQueueSize, alignof(AppEvent));
 
-LEDWidget sStatusLED;
-//#if NUMBER_OF_LEDS == 2
-FactoryResetLEDsWrapper<1> sFactoryResetLEDs{ { FACTORY_RESET_SIGNAL_LED } };
-//#else
-//FactoryResetLEDsWrapper<3> sFactoryResetLEDs{ { FACTORY_RESET_SIGNAL_LED, FACTORY_RESET_SIGNAL_LED1,
-//						FACTORY_RESET_SIGNAL_LED2 } };
-//#endif
+	k_timer sFunctionTimer;
+	k_timer sSensorTimer;
 
-bool sIsNetworkProvisioned = false;
-bool sIsNetworkEnabled = false;
-bool sHaveBLEConnections = false;
+	LEDWidget sStatusLED;
+	//#if NUMBER_OF_LEDS == 2
+	FactoryResetLEDsWrapper<1> sFactoryResetLEDs{ { FACTORY_RESET_SIGNAL_LED } };
+	//#else
+	//FactoryResetLEDsWrapper<3> sFactoryResetLEDs{ { FACTORY_RESET_SIGNAL_LED, FACTORY_RESET_SIGNAL_LED1,
+	//						FACTORY_RESET_SIGNAL_LED2 } };
+	//#endif
+
+	bool sIsNetworkProvisioned = false;
+	bool sIsNetworkEnabled = false;
+	bool sHaveBLEConnections = false;
 } /* namespace */
 
 namespace LedConsts
@@ -98,6 +102,24 @@ static const struct adc_dt_spec adc_channels[] = {
 	DT_FOREACH_PROP_ELEM(DT_PATH(zephyr_user), io_channels,
 			     DT_SPEC_AND_COMMA)
 };
+
+void SensorTimerHandler(k_timer *timer)
+{
+        AppEvent event;
+        event.Type = AppEventType::SensorMeasure;
+        event.Handler = AppTask::SensorMeasureHandler;
+        AppTask::Instance().PostEvent(event);
+}
+
+void StartSensorTimer(uint32_t aTimeoutMs)
+{
+        k_timer_start(&sSensorTimer, K_MSEC(aTimeoutMs), K_MSEC(aTimeoutMs));
+}
+
+void StopSensorTimer()
+{
+        k_timer_stop(&sSensorTimer);
+}
 
 CHIP_ERROR AppTask::Init()
 {
@@ -191,12 +213,8 @@ CHIP_ERROR AppTask::Init()
 		return err;
 	}
 
-	return CHIP_NO_ERROR;
-}
-
-CHIP_ERROR AppTask::StartApp()
-{
-	ReturnErrorOnFailure(Init());
+	k_timer_init(&sSensorTimer, &SensorTimerHandler, nullptr);
+	k_timer_user_data_set(&sSensorTimer, this);	
 
 	/* Configure ADC channels individually prior to sampling. */
 	for (size_t i = 0U; i < ARRAY_SIZE(adc_channels); i++) {
@@ -210,53 +228,20 @@ CHIP_ERROR AppTask::StartApp()
 			LOG_ERR("Could not setup channel #%d (%d)\n", i, err);
 			break;
 		}
-	}
+	}	
+
+	return CHIP_NO_ERROR;
+}
+
+CHIP_ERROR AppTask::StartApp()
+{
+	ReturnErrorOnFailure(Init());
 
 	AppEvent event = {};
 
 	while (true) {
 		k_msgq_get(&sAppEventQueue, &event, K_FOREVER);
 		DispatchEvent(event);
-
-		/*int16_t buf;
-		struct adc_sequence sequence = {
-			.buffer = &buf,
-			// buffer size in bytes, not number of samples
-			.buffer_size = sizeof(buf),
-		};*/
-
-		/*while (1) {
-			printk("ADC reading:\n");
-			for (size_t i = 0U; i < ARRAY_SIZE(adc_channels); i++) {
-				int32_t val_mv;
-
-				printk("- %s, channel %d: ",
-					adc_channels[i].dev->name,
-					adc_channels[i].channel_id);
-
-				(void)adc_sequence_init_dt(&adc_channels[i], &sequence);
-
-				err = adc_read(adc_channels[i].dev, &sequence);
-				if (err < 0) {
-					printk("Could not read (%d)\n", err);
-					continue;
-				} else {
-					printk("%"PRId16, buf);
-				}
-
-				// conversion to mV may not be supported, skip if not
-				val_mv = buf;
-				err = adc_raw_to_millivolts_dt(&adc_channels[i],
-								&val_mv);
-				if (err < 0) {
-					printk(" (value in mV not available)\n");
-				} else {
-					printk(" = %"PRId32" mV\n", val_mv);
-				}
-			}
-
-			k_sleep(K_MSEC(1000));
-		}*/
 	}
 
 	return CHIP_NO_ERROR;
@@ -415,4 +400,70 @@ void AppTask::DispatchEvent(const AppEvent &event)
 	} else {
 		LOG_INF("Event received with no handler. Dropping event.");
 	}
+}
+
+void AppTask::SensorActivateHandler(const AppEvent &)
+{
+        StartSensorTimer(5000);
+}
+
+void AppTask::SensorDeactivateHandler(const AppEvent &)
+{
+        StopSensorTimer();
+}
+
+void AppTask::SensorMeasureHandler(const AppEvent &)
+{
+
+		/*int16_t buf;
+		struct adc_sequence sequence = {
+			.buffer = &buf,
+			// buffer size in bytes, not number of samples
+			.buffer_size = sizeof(buf),
+		};*/
+
+		/*while (1) {
+			printk("ADC reading:\n");
+			for (size_t i = 0U; i < ARRAY_SIZE(adc_channels); i++) {
+				int32_t val_mv;
+
+				printk("- %s, channel %d: ",
+					adc_channels[i].dev->name,
+					adc_channels[i].channel_id);
+
+				(void)adc_sequence_init_dt(&adc_channels[i], &sequence);
+
+				err = adc_read(adc_channels[i].dev, &sequence);
+				if (err < 0) {
+					printk("Could not read (%d)\n", err);
+					continue;
+				} else {
+					printk("%"PRId16, buf);
+				}
+
+				// conversion to mV may not be supported, skip if not
+				val_mv = buf;
+				err = adc_raw_to_millivolts_dt(&adc_channels[i],
+								&val_mv);
+				if (err < 0) {
+					printk(" (value in mV not available)\n");
+				} else {
+					printk(" = %"PRId32" mV\n", val_mv);
+				}
+			}
+
+			k_sleep(K_MSEC(1000));
+		}*/
+
+        chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(
+        	/* endpoint ID */ 1, /* pressure */ int16_t(rand() % 3000));
+
+        chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(
+        	/* endpoint ID */ 2, /* pressure */ int16_t(rand() % 3000));
+
+        chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(
+        	/* endpoint ID */ 3, /* pressure */ int16_t(rand() % 3000));
+
+        chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(
+        	/* endpoint ID */ 4, /* pressure */ int16_t(rand() % 3000));
 }
