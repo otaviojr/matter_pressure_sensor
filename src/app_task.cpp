@@ -451,17 +451,8 @@ void AppTask::SensorMeasureHandler(const AppEvent &)
 			} else {
 				LOG_INF(" = %" PRId32 " mV\n", val_mv);
 			}
+
+			chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(
+				/* endpoint ID */ i+1, /* pressure */ val_mv);
 		}
-
-        chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(
-        	/* endpoint ID */ 1, /* pressure */ int16_t(rand() % 3000));
-
-        chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(
-        	/* endpoint ID */ 2, /* pressure */ int16_t(rand() % 3000));
-
-        chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(
-        	/* endpoint ID */ 3, /* pressure */ int16_t(rand() % 3000));
-
-        chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(
-        	/* endpoint ID */ 4, /* pressure */ int16_t(rand() % 3000));
 }
