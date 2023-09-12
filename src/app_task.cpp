@@ -223,9 +223,9 @@ CHIP_ERROR AppTask::Init()
 			break;
 		}
 
-		int err = adc_channel_setup_dt(&adc_channels[i]);
-		if (err < 0) {
-			LOG_ERR("Could not setup channel #%d (%d)\n", i, err);
+		int error = adc_channel_setup_dt(&adc_channels[i]);
+		if (error < 0) {
+			LOG_ERR("Could not setup channel #%d (%d)\n", i, error);
 			break;
 		}
 	}	
@@ -415,45 +415,43 @@ void AppTask::SensorDeactivateHandler(const AppEvent &)
 void AppTask::SensorMeasureHandler(const AppEvent &)
 {
 
-		/*int16_t buf;
+		int16_t buf;
+		int err;
+
 		struct adc_sequence sequence = {
 			.buffer = &buf,
 			// buffer size in bytes, not number of samples
 			.buffer_size = sizeof(buf),
-		};*/
+		};
 
-		/*while (1) {
-			printk("ADC reading:\n");
-			for (size_t i = 0U; i < ARRAY_SIZE(adc_channels); i++) {
-				int32_t val_mv;
+		LOG_INF("ADC reading:\n");
+		for (size_t i = 0U; i < ARRAY_SIZE(adc_channels); i++) {
+			int32_t val_mv;
 
-				printk("- %s, channel %d: ",
-					adc_channels[i].dev->name,
-					adc_channels[i].channel_id);
+			printk("- %s, channel %d: ",
+				adc_channels[i].dev->name,
+				adc_channels[i].channel_id);
 
-				(void)adc_sequence_init_dt(&adc_channels[i], &sequence);
+			(void)adc_sequence_init_dt(&adc_channels[i], &sequence);
 
-				err = adc_read(adc_channels[i].dev, &sequence);
-				if (err < 0) {
-					printk("Could not read (%d)\n", err);
-					continue;
-				} else {
-					printk("%"PRId16, buf);
-				}
-
-				// conversion to mV may not be supported, skip if not
-				val_mv = buf;
-				err = adc_raw_to_millivolts_dt(&adc_channels[i],
-								&val_mv);
-				if (err < 0) {
-					printk(" (value in mV not available)\n");
-				} else {
-					printk(" = %"PRId32" mV\n", val_mv);
-				}
+			err = adc_read(adc_channels[i].dev, &sequence);
+			if (err < 0) {
+				LOG_ERR("Could not read (%d)\n", err);
+				continue;
+			} else {
+				LOG_INF("%" PRId16, buf);
 			}
 
-			k_sleep(K_MSEC(1000));
-		}*/
+			// conversion to mV may not be supported, skip if not
+			val_mv = buf;
+			err = adc_raw_to_millivolts_dt(&adc_channels[i],
+							&val_mv);
+			if (err < 0) {
+				LOG_ERR(" (value in mV not available)\n");
+			} else {
+				LOG_INF(" = %" PRId32 " mV\n", val_mv);
+			}
+		}
 
         chip::app::Clusters::PressureMeasurement::Attributes::MeasuredValue::Set(
         	/* endpoint ID */ 1, /* pressure */ int16_t(rand() % 3000));

@@ -28,6 +28,9 @@
 	status = "disabled";
 };
 
+&i2c0 {
+	status = "disabled";
+};
 
 &adc {
 	#address-cells = <1>;
@@ -38,7 +41,7 @@
 		zephyr,gain = "ADC_GAIN_1_6";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,input-positive = <NRF_ADC_AIN0>; /* P0.04 */
+		zephyr,input-positive = <NRF_ADC_AIN0>; /* P0.02 */
 		zephyr,resolution = <12>;
 	};
 
@@ -47,7 +50,7 @@
 		zephyr,gain = "ADC_GAIN_1_6";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,input-positive = <NRF_ADC_AIN1>; /* P0.05 */
+		zephyr,input-positive = <NRF_ADC_AIN1>; /* P0.03 */
 		zephyr,resolution = <12>;
 	};
 
@@ -56,7 +59,7 @@
 		zephyr,gain = "ADC_GAIN_1_6";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,input-positive = <NRF_ADC_AIN2>; /* P0.06 */
+		zephyr,input-positive = <NRF_ADC_AIN4>; /* P0.28 */
 		zephyr,resolution = <12>;
 	};
 
@@ -65,7 +68,7 @@
 		zephyr,gain = "ADC_GAIN_1_6";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,input-positive = <NRF_ADC_AIN3>; /* P0.07 */
+		zephyr,input-positive = <NRF_ADC_AIN5>; /* P0.29 */
 		zephyr,resolution = <12>;
 	};
 };
