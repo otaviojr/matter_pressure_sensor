@@ -1,4 +1,4 @@
 .python-version
 .vscode/
 build/
-xiao_ble/
+/xiao_ble/
